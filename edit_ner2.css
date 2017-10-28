@@ -1,0 +1,224 @@
+/*
+ * fichier de style CSS pour l'editeur de meuble de type Niches en réseau
+ */
+
+.jscad-container {
+	margin: 0px;padding: 0px;
+	color: Black;
+	font-weight: bold;
+	font-family: Helvetica, Arial, Sans;
+	border: none;
+}
+
+#header {
+	margin: 5px; /* not inherited */
+}
+
+#viewerContext {
+	margin: 0px; /* not inherited */
+	/*border: 1px solid gray;*/
+	border:none;
+	padding: 0px; /* not inherited */
+
+	background: white;
+	position:absolute;
+  
+	top: 0px;left:0px;
+	height:99%; width:100%;
+	/*overflow:hidden;*/
+}
+
+canvas { 
+	margin: 0px; /* not inherited */
+	border: 0px none gray; /* not inherited */
+	padding: 0px; /* not inherited */
+	cursor: default;
+}
+
+#parametersdiv {
+	margin: 5px; /* not inherited */
+	border: thin solid rgb(200,200,200);
+	border-radius: 1em;     
+	padding: 10px;
+	width:230px;
+	background: white;
+	opacity: 0.8;
+}
+
+#parametersdiv table {
+	margin-bottom: 5px;
+	
+	text-align: left;
+	font-size: 0.8em;
+	font-weight: normal;
+}
+
+#parametersdiv th {
+	margin:  0px; /* not inherited */
+	border:  0px none gray; /* not inherited */
+	padding: 5px; /* not inherited */
+
+	font-weight: bold;
+}
+
+#parametersdiv th.caption {
+	text-decoration: underline;
+}
+
+#parametersdiv td.caption {
+	text-align: right;
+	font-weight: bold;font-size:0.7em;
+}
+
+#parametersdiv td {
+	margin:  0px; /* not inherited */
+	border:  0px none gray; /* not inherited */
+	padding: 0px; /* not inherited */
+}
+
+#parametersdiv input, #parametersdiv textarea, #parametersdiv select {
+	font-size: 0.9em;
+	background: #fea;
+	border: none;
+}
+
+#updateButton {
+	margin:  5px; /* not inherited */
+	border:  thin solid Black; /* not inherited */
+	padding: 2px; /* not inherited */
+	border-radius: 4px;
+	background: white;
+
+	margin-left: 1em;
+}
+
+#tail { 
+	margin: 5px; /* not inherited */
+	position:absolute;top:630px;
+}
+
+#busy {
+	vertical-align: middle;
+}
+
+html, body {
+   margin: 0px;             /* not inherited */
+   border: 0px none black;  /* not inherited */
+   padding: 0px;            /* not inherited */
+   font-family: Helvetica, Arial, Sans;
+
+   /* ensure that the document uses the whole width and height of the browser */
+   min-height: 100%;
+   height: 100%;
+   min-width: 100%;
+   width: 100%;
+
+   /* viewer/canvas is full screen so when window
+      is resized all remains intact, but we make sure no scrollbar appears */
+   overflow: hidden;
+}
+.pt {
+	background-color:black;
+	width:8px;
+	height:8px;
+	cursor:crosshair;
+	padding:0;
+	border:2px solid black;
+}
+
+.bz, .bzre {
+	width:5px;
+	height:5px;
+	cursor:crosshair;
+	padding:0;
+	border:1px solid black;
+	border-radius:10px;
+}
+
+.bz {
+	background-color:gray;
+}
+
+.bzre {
+	background-color:red;
+}
+
+.re {
+	background-color:red;
+	width:8px;
+	height:8px;
+	cursor:crosshair;
+	padding:0;
+	border:2px solid black;
+}
+
+.pt:focus, .pt:active {
+	border-color:orange;
+}
+
+.nicheCourante {
+	background-color:blue;
+}
+
+.pt1 {
+	background-color:LightBlue;
+}
+.ptZ {
+	background-color:DeepskyBlue;
+}
+
+.courbe {
+	border-radius:10px;
+}
+
+#ner_ed {
+  margin: 0;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+/*  left: 0; */
+  right: 0;
+
+  //width: 40%;
+  font-weight: normal;
+  background: rgba(255,255,255,0.15);
+}
+
+#editHandle {
+  left: -25px;
+  top: 45%;
+  position: absolute;
+  z-index: 6;
+  opacity: 0.9;
+}
+
+#zone {
+	width:608px;
+	height:608px;
+	border:2px solid black;
+	overflow:hidden;
+}
+
+#menu {
+	height:24px;
+	margin:0px;
+	padding:0px;
+}
+
+#canvasNER {
+	overflow:hidden;
+	position:absolute;
+	top:33px;
+	left:10px;
+}
+
+#bt_ajoutePt,#bt_divisePt,#bt_supprimePt {
+	width:16px;
+	padding:0px;
+	margin:0px;
+}
+
+#SN {
+	border-bottom:1px solid rgba(153,153,153,.3);
+	margin:-10px 0 4px 0;
+}

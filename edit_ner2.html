@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="fr">
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css">	<title>Editeur de Structure de type Niches en Réseau (NER)</title>
+	<script src="jquery/jquery-1.9.1.js?0.5.0"></script>
+	<script src="jquery/jquery.hammer.js?0.5.0"></script>
+	<script src="jquery/jquery-ui.js"></script>
+	<script src="lightgl.js"></script>
+	<script src="csg.js?0.5.0"></script>
+	<script src="formats.js?0.5.0"></script>
+	<script src="openjscad_gc.js?0.5.0"></script>
+	<script src="openscad.js?0.5.0"></script>
+	<script src="js/jscad-worker.js?0.5.0" charset="utf-8"></script>
+	<script src="js/jscad-function.js?0.5.0" charset="utf-8"></script>
+	<script src="edit_ner2.js"></script>
+	
+  <script type="text/javascript" src="gcode-simulator-master/js/three.js"></script>
+  <script type="text/javascript" src="gcode-simulator-master/js/gcode-simulator.js"></script>
+  <script type="text/javascript" src="gcode-simulator-master/js/machine.js"></script>
+  <script type="text/javascript" src="gcode-simulator-master/js/stats.js"></script>
+  <script type="text/javascript" src="gcode-simulator-master/js/vec2.js"></script>
+  <script type="text/javascript" src="gcode-simulator-master/js/SVGReader.js"></script>
+  <script type="text/javascript" src="gcode-simulator-master/js/svg2gcode_0Z.js"></script>
+	
+	
+	<link rel="stylesheet" href="edit_ner2.css">
+
+</head>
+<body onload="init()">
+  <div class="jscad-container"><!-- OpenJSCAD -->
+    <div id="header"><div id="errordiv">Ooops!</div></div><!-- erreurs -->
+    <div oncontextmenu="return false;" id="viewerContext"></div><!-- viewer -->
+    <div id="parametersdiv" style="display: block;"></div><!-- parametres -->
+    <div id="tail" style="display: block;">
+		<div id="statusdiv"><!--button onclick="peuple();">Charger</button-->
+			<input type="file" id="choix_fichier" accept=".dat" onchange="peuple(event);"/> <a id='tfa_src_data' onclick="exporte();"><button>Export</button></a> <a target="_blank" href="http://gilboo.carton.free.fr/OPSPED2/index.html?k=objet"></a>
+		</div>		
+	</div><!-- statut -->
+  </div>
+<div id="ner_ed">
+	<div>
+		<img id="editHandle" src="imgs/editHandleIn.png"></img>
+	</div>
+	<div id="menu">
+		<button id="bt_ajoutePt" onclick="ajoutePt()" title="Ajouter Point"><i class="fa fa-plus-square"></i></button>
+		<button id="bt_courbePt" onclick="courbePt()" title="Bascule Courbe/Droite">∫</button>
+		<button onclick="AlignePoint('H')" title="Aligner Horizonalement"><i class="fa fa-arrows-v"></i></button>
+		<button onclick="AlignePoint('V')" title="Aligner Verticalement"><i class="fa fa-arrows-h"></i></button>
+		<button id="bt_divisePt" onclick="inserePt()" title="Insérer Point après">÷</button>
+		<button id="bt_supprimePt" onclick="supprimePt()" title="Supprimer Point courant"><i class="fa fa-minus-square"></i></button>
+		<button onclick="document.getElementById('fsChargeFond').click(); return false;" title="Charger Fichier en fond"><i class="fa fa-file-image-o"></i></button>
+		<button onclick="wwwChargeFond()" title="Charger URL en fond"><i class="fa fa-external-link"></i></button>
+		<input id="fsChargeFond" type="file" accept="image/*" onchange="ChargeFond(event);" style="display:none;">
+		<select id="lst_niches" title="Edition des Niches">
+			<option id="0" title="Editer le Fond">Fond</option>
+			<option id="SN" disabled="disabled"></option>
+			<option id="+" title="Ajouter Niche">(niche+)</option>
+			<option id="-" title="Supprimer Niche courante">(niche-)</option>
+		</select>
+		<button id="bt_regle" onclick="basculeRegle();" title="Bascule Règle"><i class="fa fa-anchor"></i></button>
+	</div>
+	<div id="zone">
+		<canvas id="canvasNER" width="610" height="610"></canvas>
+	</div>
+</div>
+<textarea id="zone_code" style="display:none;">
+function getParameterDefinitions(){return[
+ { name: 'h', type: 'float', initial: 10, caption:'Profondeur:'}
+,{ name: 'l', type: 'float', initial: 4, caption:'Epaisseur:'}
+,{ name: 'w', type: 'text', initial:'[["p","P0",10,10],["p","P1",-10,10],["p","P2",-10,-10],["p","P3",10,-10],["p","P4",5,5],["p","P5",-5,5],["p","P6",-5,-5],["p","P7",5,-5],["b","P4P5_0",5,10,"P4"],["b","P4P5_1",-5,0,"P5"],["n","P0,P1,P2,P3"],["n","P4,P5,P6,P7"]]', caption: '(w)'}
+,{ name: 'ech', type: 'float', initial: 0.25, caption:'Echelle:'}
+,{ name: 'rx', type: 'float', initial: 180, caption:'Rotation X:'}
+,{ name: 'rendu', type : 'choice', caption:'Rendu:', values:['3d','2d'], captions:['3d','2d']}
+
+];}
+
+class Pt {
+  constructor(id, x, y, idP) {
+	this.x = x;
+	this.y = y;
+    this.id = id;
+    if(idP !== undefined)this.idP = idP;
+  }
+  
+  get p(){
+      return {x:this.x, y:this.y};
+  }
+}
+
+function nomme2Pts(id1, id2){return id1 < id2 ? id1 + id2 : id2 + id1;}
+
+function chercheId(T, id){
+    var i, r = -1;
+    for(i=0;i<T.length;i++){
+        if(T[i].id == id){
+            r = i;
+            break;
+        }
+    }
+    return r;
+}
+
+function recupDonnees(paramW, P,B,N){
+var i, ch, w= JSON.parse(paramW);
+
+for(i=0;i<w.length;i++){
+    switch(w[i][0]){
+        case 'p':
+            P.push(new Pt(w[i][1], w[i][2], w[i][3]));
+            break;
+        case 'b':
+            B.push(new Pt(w[i][1], w[i][2], w[i][3], w[i][4]));
+            break;
+        case 'n':
+            ch = w[i][1];
+            //console.log(i, 'n:', ch);
+            N.push(ch.split(','));
+    }
+}
+}
+
+function main(params){
+
+var P = [], B = [], N =[], i,j, csg = [], r, csgBase = [], csgBase2d = [];
+recupDonnees(params.w, P,B,N);
+
+for(i=0;i<N.length;i++){
+    r = new CSG.Path2D([P[chercheId(P, N[i][0])].p]);
+    for(j=1;j<=N[i].length;j++){
+        jj = j<N[i].length ? j : 0;
+        P0 = P[chercheId(P, N[i][j-1])];
+        P1 = P[chercheId(P, N[i][jj])];
+        chB = nomme2Pts(N[i][j-1], N[i][jj]);
+        BId0 = chercheId(B, chB+'_0');
+        if(BId0 == -1){
+            r = r.appendPoint(P1.p);
+        } else {
+            BId1 = chercheId(B, chB+'_1');
+            if(B[BId0].idP == P0.id){
+                r = r.appendBezier([B[BId0].p, B[BId1].p, P1.p]);
+            }else{
+                r = r.appendBezier([B[BId1].p, B[BId0].p, P1.p]);
+            }
+        }
+    }
+    csg.push(polygon(r));
+    if(i>0){
+        if(params.rendu == '3d')
+			csgBase.push(r.rectangularExtrude(params.l,params.h,16,true))
+		else
+			csgBase.push(r.expandToCAG(params.h, 16));
+	}
+}
+
+R = csg[0];
+if(csg.length>1){
+    csg.shift();
+    R = R.subtract(csg);
+}
+
+if(params.rendu == '3d')
+	return R.extrude({offset:[0,0,params.h]}).union(csgBase).scale(0.25).lieFlat().rotateX(180)
+else{
+	R = center(true, R.union(csgBase));
+	R = R.rotateZ(params.rx+0);
+	b = R.getBounds();
+	R = R.translate([-b[0].x, -b[0].y]);
+	return R.scale(params.ech);
+}
+}
+</textarea>
+</body>
+</html>
